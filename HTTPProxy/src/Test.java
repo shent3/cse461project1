@@ -198,12 +198,15 @@ public class Test {
         private void fetchRequest(StringBuffer sb, DataOutputStream res,
                                   String host, int port) {
             try {
+                System.out.println(host + port);
                 Socket s2 = new Socket(host, port);
                 InputStream serverResponse = s2.getInputStream();
                 PrintWriter clientRequest =
                         new PrintWriter(new OutputStreamWriter(s2.getOutputStream()));
 
                 // print out the request
+
+                System.out.println(sb.toString());
                 clientRequest.print(sb.toString());
 
                 // flush the writer

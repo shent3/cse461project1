@@ -31,19 +31,20 @@ public class ClientThread extends Thread {
                 LocalDateTime now = LocalDateTime.now();
                 System.out.println(dtf.format(now) + ": Proxy listening on " + socket.getLocalAddress() + ": " + socket.getLocalPort());
             }
-            StringBuffer outputBuffer = new StringBuffer();
             String host = null;
+            StringBuffer outputBuffer = new StringBuffer();
             while (request != null && request.length() > 0) {
                 LocalDateTime now = LocalDateTime.now();
-
+                request.trim();
                 String[] requestTokens = request.split(" ");
                 String requestHeader = requestTokens[0];
-                System.out.println(dtf.format(now) + ": " + request);
+//                System.out.println(dtf.format(now) + ": " + request);
 
                 if (requestHeader.equalsIgnoreCase(GET_METHOD)) {
-//                    System.out.println(dtf.format(now) + ": " + request);
+                    System.out.println(dtf.format(now) + ": " + request);
                 } else if (requestHeader.equalsIgnoreCase(CONNECTION_TAG)) {
-//                    System.out.println(dtf.format(now) + ": " + request);
+                    System.out.println(dtf.format(now) + ": " + request);
+                    request = CONNECTION_CLOSE;
                 } else if (requestHeader.equalsIgnoreCase(HOST_TAG)) {
                     StringBuilder sb = new StringBuilder("");
                     for (int i = 1; i < requestTokens.length; i++)
@@ -51,60 +52,69 @@ public class ClientThread extends Thread {
 
                     String[] hostTokens = sb.toString().split(":");
                     if (hostTokens.length == 2) {
-                        port = Integer.valueOf(hostTokens[1]);
+                        port = Integer.parseInt(hostTokens[1]);
                     }
                     host = sb.toString();
-                    request = "HOST" + host;
+                    request = "HOST: " + host;
                 }
-
-
                 // append end line tag
                 if (outputBuffer != null && request != null) {
                     outputBuffer.append(request + "\r\n");
                 }
-
-                if (host != null) {
-                    DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-                    Socket socket2 = new Socket(host, port);
-                    InputStream serverResponse = socket2.getInputStream();
-                    PrintWriter clientRequest =
-                            new PrintWriter(new OutputStreamWriter(socket2.getOutputStream()));
-
-                    // print out the request
-                    clientRequest.print(outputBuffer.toString());
-
-                    // flush the writer
-                    clientRequest.flush();
-
-                    // a buffer to hold the response from server
-                    // and send to the client
-                    byte[] buf = new byte[32767];
-                    int numOfBytes = serverResponse.read(buf);
-
-                    // keep reading from the buffer until there's nothing to be read
-                    while (numOfBytes != -1) {
-                        // write the response to client
-                        // and flush the writer
-                        outputStream.write(buf, 0, numOfBytes);
-                        outputStream.flush();
-
-                        // read the next line of the response
-                        numOfBytes = serverResponse.read(buf);
-
-                        // cSocket.shutdownOutput(); // for experiment
-                        // cSocket.shutdownInput(); // for experiment
-                    }
-
-                    // done with sending request and getting response,
-                    // so close all the things we created for the connection
-                    clientRequest.close();
-                    serverResponse.close();
-                    socket2.close();
-                    outputStream.close();
-                }
-
                 request = reader.readLine();
             }
+            if (outputBuffer != null) {
+                outputBuffer.append("\r\n");
+            }
+
+
+            if (host != null) {
+//                System.out.println(host + port);
+                DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+                Socket socket2 = new Socket(host, port);
+                InputStream serverResponse = socket2.getInputStream();
+                PrintWriter clientRequest =
+                        new PrintWriter(new OutputStreamWriter(socket2.getOutputStream()));
+
+                // print out the request
+//                System.out.println("writing " + outputBuffer.toString());
+                clientRequest.print(outputBuffer.toString());
+
+                // flush the writer
+//                System.out.println("flushing");
+                clientRequest.flush();
+//                System.out.println("Done flushing");
+
+                // a buffer to hold the response from server
+                // and send to the client
+                byte[] buf = new byte[32767];
+                int numOfBytes = serverResponse.read(buf);
+
+//                System.out.println("host not null");
+
+                // keep reading from the buffer until there's nothing to be read
+                while (numOfBytes != -1) {
+//                    System.out.println("Appending response");
+                    // write the response to client
+                    // and flush the writer
+                    outputStream.write(buf, 0, numOfBytes);
+                    outputStream.flush();
+
+                    // read the next line of the response
+                    numOfBytes = serverResponse.read(buf);
+
+                    // cSocket.shutdownOutput(); // for experiment
+                    // cSocket.shutdownInput(); // for experiment
+                }
+
+                // done with sending request and getting response,
+                // so close all the things we created for the connection
+                clientRequest.close();
+                serverResponse.close();
+                socket2.close();
+                outputStream.close();
+            }
+
             reader.close();
 
         } catch (UnknownHostException e) {
