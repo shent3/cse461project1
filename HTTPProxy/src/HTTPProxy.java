@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class HTTPProxy {
     public static int portNumber;
 
-    public static void main() {
+    public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         runProxy(scan);
     }
@@ -30,13 +30,15 @@ public class HTTPProxy {
         }
 
         ServerSocket socket = null;
+        Thread thread = null;
         try {
             socket = new ServerSocket(portNumber);
+            thread = new ClientThread(socket.accept());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Thread thread = new ClientThread();
+
         thread.run();
 
     }
