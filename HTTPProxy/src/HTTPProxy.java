@@ -38,7 +38,6 @@ public class HTTPProxy {
             e.printStackTrace();
         }
 
-
         thread.run();
 
     }
