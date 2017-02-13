@@ -7,39 +7,35 @@ import java.util.Scanner;
  */
 
 public class HTTPProxy {
-    public static int portNumber;
 
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        runProxy(scan);
+        if (args.length != 1) {
+            System.out.println("Usage: java HTTPProxy <port>");
+            System.exit(0);
+        }
+        int port = 0;
+        try {
+            port = Integer.parseInt(args[0]);
+            if (port < 0 || port > 65536) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            System.out.printf("Invalid port number: %s\n", args[0]);
+            System.exit(0);
+        }
+        runProxy(port);
     }
 
-    public static void runProxy(Scanner scan) {
-        while (true) {
-            if (scan.hasNextInt()) {
-                portNumber = scan.nextInt();
-            } else {
-                System.out.println("Invalid port number.");
-            }
-
-            if (portNumber < 0 || portNumber > 65536) {
-                System.out.println("Invalid port number.");
-            } else {
-                break;
-            }
-        }
-
+    public static void runProxy(int port) {
         ServerSocket socket = null;
         Thread thread = null;
         try {
-            socket = new ServerSocket(portNumber);
+            socket = new ServerSocket(port);
             thread = new ClientThread(socket.accept());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
+        System.out.printf("Starting proxy at port: %d\n", port);
         thread.run();
-
     }
 }
