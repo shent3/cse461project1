@@ -32,7 +32,7 @@ public class HTTPProxy {
         try {
             socket = new ServerSocket(port);
             while (true) {
-                thread = new ClientThread(socket.accept());
+                thread = new ProxyThread(socket.accept());
                 thread.run();
             }
         } catch (Exception e) {

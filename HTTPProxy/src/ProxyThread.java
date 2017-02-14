@@ -50,7 +50,7 @@ public class ProxyThread extends Thread {
                     }
                     host = hostTokens[0];
                     System.out.println(dtf.format(now) + " - >>> CONNECT " + host + ":" + port);
-                    request = "HOST: " + host;
+                    request = "HOST: " + host + ":" + port;
                 }
                 if (outputBuffer != null && request != null) {
                     outputBuffer.append(request + "\r\n");
