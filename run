@@ -1,0 +1,3 @@
+javac ProxyThread.java
+javac HTTPProxy.java
+java HTTPProxy $1
