@@ -1,5 +1,7 @@
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 /**
@@ -31,9 +33,12 @@ public class HTTPProxy {
         Thread thread = null;
         try {
             socket = new ServerSocket(port);
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            System.out.println(dtf.format(now) + " - Proxy listening on " + socket.getLocalSocketAddress());
             while (true) {
                 thread = new ProxyThread(socket.accept());
-                thread.run();
+                thread.start();
             }
         } catch (Exception e) {
             e.printStackTrace();
