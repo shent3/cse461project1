@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ public class ProxyThread extends Thread {
             for (request = reader.readLine(); request != null && !request.isEmpty(); request = reader.readLine()) {
                 if (request.startsWith(CONNECTION_TAG)) {
                     if (!requestTokens[0].equals(CONNECTION_METHOD)) {
-                        request = CONNECTION_TAG + "close";
+                         request = CONNECTION_TAG + "close";
                     }
                 } else if (request.startsWith(HOST_TAG)) {
                     String[] hostTokens = request.substring(request.indexOf(" ") + 1).split(":");
@@ -117,10 +118,15 @@ public class ProxyThread extends Thread {
             clientRequest.print(buffer.toString() + "\r\n");
             clientRequest.flush();
             byte[] buf = new byte[32767];
-            int numOfBytes = serverResponse.read(buf);
-            while (numOfBytes != -1) {
-                outputStream.write(buf, 0, numOfBytes);
-                outputStream.flush();
+            int numOfBytes = 0;
+            try {
+                numOfBytes = serverResponse.read(buf);
+            } catch (SocketException se) {}
+            while (numOfBytes > 0) {
+                try {
+                    outputStream.write(buf, 0, numOfBytes);
+                    outputStream.flush();
+                } catch (SocketException se) {}
                 numOfBytes = serverResponse.read(buf);
             }
             clientRequest.close();
