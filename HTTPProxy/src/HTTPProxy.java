@@ -33,7 +33,6 @@ public class HTTPProxy {
             socket = new ServerSocket(port);
             while (true) {
                 thread = new ClientThread(socket.accept());
-                System.out.printf("Starting proxy at port: %d\n", port);
                 thread.run();
             }
         } catch (Exception e) {
